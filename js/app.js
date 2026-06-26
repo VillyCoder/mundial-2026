@@ -54,6 +54,17 @@ function initInstallBanner() {
         e.preventDefault();
         deferredInstallPrompt = e;
         showInstallBanner(false);
+        document.dispatchEvent(new CustomEvent('mundial:install-available'));
+    });
+
+    // Responder a peticion de instalacion desde Mi Equipo
+    document.addEventListener('mundial:install-requested', () => triggerInstall(null));
+
+    // Informar si el prompt no esta disponible todavia
+    document.addEventListener('mundial:install-check', () => {
+        if (!deferredInstallPrompt) {
+            document.dispatchEvent(new CustomEvent('mundial:install-not-available'));
+        }
     });
 }
 
@@ -94,16 +105,18 @@ function showInstallBanner(isIOS) {
         setTimeout(() => banner.remove(), 400);
     });
 
-    banner.querySelector('#install-btn')?.addEventListener('click', async () => {
-        if (!deferredInstallPrompt) return;
-        deferredInstallPrompt.prompt();
-        const { outcome } = await deferredInstallPrompt.userChoice;
-        deferredInstallPrompt = null;
-        if (outcome === 'accepted') {
-            banner.classList.remove('visible');
-            setTimeout(() => banner.remove(), 400);
-        }
-    });
+    banner.querySelector('#install-btn')?.addEventListener('click', () => triggerInstall(banner));
+}
+
+async function triggerInstall(bannerEl) {
+    if (!deferredInstallPrompt) return;
+    deferredInstallPrompt.prompt();
+    const { outcome } = await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt = null;
+    if (outcome === 'accepted' && bannerEl) {
+        bannerEl.classList.remove('visible');
+        setTimeout(() => bannerEl.remove(), 400);
+    }
 }
 
 // Inicializa la app cuando el DOM esta listo

@@ -473,6 +473,29 @@ html:not(.light-mode) .notif-status.info { color: #90CAF9; border-left-color: #9
 .btn-install-dismiss { color: var(--text-muted); font-size: var(--font-size-sm); padding: 8px; }
 .btn-install-dismiss:hover { color: var(--text-primary); }
 
+/* Boton instalar en Mi Equipo */
+.btn-install-app { background: var(--primary); color: #000; font-family: var(--font-heading); font-size: var(--font-size-sm); padding: 8px 16px; border-radius: var(--radius-md); font-weight: 600; letter-spacing: 0.04em; flex-shrink: 0; }
+.btn-install-app:hover { opacity: 0.85; }
+
+/* Modal de instrucciones iOS */
+.ios-install-modal { position: fixed; inset: 0; z-index: 800; pointer-events: none; }
+.ios-install-modal.visible { pointer-events: auto; }
+.ios-install-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.55); opacity: 0; transition: opacity 0.3s ease; }
+.ios-install-modal.visible .ios-install-overlay { opacity: 1; }
+.ios-install-sheet { position: absolute; bottom: 0; left: 0; right: 0; background: var(--bg-card); border-radius: var(--radius-xl) var(--radius-xl) 0 0; border: 1px solid var(--border); border-bottom: none; padding: var(--space-xl) var(--space-lg); box-shadow: 0 -8px 40px rgba(0,0,0,0.4); transform: translateY(100%); transition: transform 0.35s ease; }
+.ios-install-modal.visible .ios-install-sheet { transform: translateY(0); }
+.ios-install-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-xl); }
+.ios-install-title { font-family: var(--font-heading); font-size: var(--font-size-lg); color: var(--primary); text-transform: uppercase; letter-spacing: 0.08em; }
+.ios-install-close { color: var(--text-muted); font-size: 18px; padding: 4px 8px; }
+.ios-install-close:hover { color: var(--text-primary); }
+.ios-install-steps { display: flex; flex-direction: column; gap: var(--space-lg); }
+.ios-install-step { display: flex; align-items: flex-start; gap: var(--space-md); }
+.ios-step-num { width: 28px; height: 28px; border-radius: 50%; background: var(--primary); color: #000; font-family: var(--font-heading); font-size: var(--font-size-base); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: 700; }
+.ios-step-text { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.ios-step-label { font-weight: 600; color: var(--text-primary); font-size: var(--font-size-base); }
+.ios-step-desc { color: var(--text-secondary); font-size: var(--font-size-sm); line-height: 1.4; }
+.ios-share-icon { color: var(--primary); flex-shrink: 0; }
+
 .teams-page { max-width: 900px; margin: 0 auto; }
 .teams-group { margin-bottom: var(--space-xl); }
 .teams-group-header { margin-bottom: var(--space-sm); }
@@ -524,19 +547,42 @@ html:not(.light-mode) .notif-status.info { color: #90CAF9; border-left-color: #9
 @media (max-width: 768px) {
     .menu-toggle { display: flex; }
     .brand-text { font-size: 1.4rem; }
+
+    /* Toggle de tema: sale del centro absoluto y se pega a la derecha junto al refresh */
+    .btn-theme { position: static; transform: none; margin-left: auto; }
+    .header-actions { margin-left: 0; }
+
+    /* Hero responsive */
+    .hero-banner { height: auto; padding: var(--space-lg) var(--space-md); }
+    .hero-content { flex-direction: column; gap: var(--space-md); }
+    .hero-logo { width: 52px; height: 52px; }
+    .hero-text h1 { font-size: var(--font-size-xl); }
+    .hero-text p { font-size: var(--font-size-sm); }
+
+    /* Detalle de partido: sin wrap para que los equipos queden siempre en linea */
+    .detail-scorecard { gap: var(--space-sm); padding: var(--space-md) var(--space-sm); flex-wrap: nowrap; }
+    .detail-team { min-width: 0; flex: 1; }
+    .detail-flag { width: 44px; height: 30px; }
+    .detail-team-name { font-size: var(--font-size-sm); }
+    .detail-score-val { font-size: 40px; }
+    .detail-info-bar { flex-direction: column; align-items: center; }
+
+    /* Clasificacion: solo Pos + Equipo + PJ + PTS para no saturar en movil */
+    .standings-grid { grid-template-columns: 1fr; }
+    .sgt-header, .sgt-row { grid-template-columns: 20px 1fr 32px 44px; }
+    .sgt-col.sgt-stat { display: none; }
+    .sgt-col.sgt-stat:nth-child(3) { display: block; }
+    .sgt-col.sgt-pts { text-align: center; font-size: 1.05rem; }
+    .sgt-flag { width: 22px; height: 16px; }
+
+    /* Equipos: ocultar G/E/P para que quepan bandera y nombre */
+    .team-row-right { gap: var(--space-md); }
+    .team-stat-cell { min-width: 28px; }
+    .team-stat-cell:not(:first-child):not(:last-child) { display: none; }
+
     .matches-grid { grid-template-columns: 1fr; max-width: 420px; margin: 0 auto; }
     .flag-lg { width: 40px; height: 28px; }
     .score-val { font-size: var(--font-size-2xl); }
-    .detail-scorecard { gap: var(--space-lg); padding: var(--space-lg); flex-wrap: wrap; justify-content: center; }
-    .detail-team { min-width: 100px; }
-    .detail-flag { width: 56px; height: 40px; }
-    .detail-team-name { font-size: var(--font-size-base); }
-    .detail-score-val { font-size: 40px; }
-    .detail-info-bar { flex-direction: column; align-items: center; }
-    .standings-grid { grid-template-columns: 1fr; }
-    .sgt-header, .sgt-row { grid-template-columns: 24px 1fr repeat(3, 32px) 36px 40px; }
-    .sgt-header .sgt-stat:nth-child(n+5), .sgt-row .sgt-stat:nth-child(n+5) { display: none; }
-    .sgt-flag { width: 22px; height: 16px; }
     .cal-match { padding: var(--space-md) var(--space-lg); }
     .cal-flag { width: 32px; height: 22px; }
     .cal-team-name { font-size: var(--font-size-sm); }
@@ -563,10 +609,4 @@ html:not(.light-mode) .notif-status.info { color: #90CAF9; border-left-color: #9
     .filter-btn, .day-tab, .phase-tab { padding: 6px 10px; font-size: 11px; }
     .cal-widget { padding: var(--space-md); }
     .nav-item { padding: 12px var(--space-md); }
-    /* Hero responsive: menos altura y fuente más pequeña en movil */
-    .hero-banner { height: auto; padding: var(--space-lg) var(--space-md); }
-    .hero-content { flex-direction: column; gap: var(--space-md); }
-    .hero-logo { width: 52px; height: 52px; }
-    .hero-text h1 { font-size: var(--font-size-xl); }
-    .hero-text p { font-size: var(--font-size-sm); }
 }

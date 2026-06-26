@@ -108,6 +108,19 @@ export const MyTeam = {
                     </div>
                 </div>
 
+                <div class="team-section" id="install-section">
+                    <h2>Instalar app</h2>
+                    <div class="settings-card" id="install-card">
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <span class="setting-label">Mundial 2026</span>
+                                <span class="setting-desc" id="install-desc">Acceso rapido desde tu pantalla de inicio</span>
+                            </div>
+                            <button class="btn-install-app" id="installAppBtn">Instalar</button>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="team-section">
                     <h2>Notificaciones</h2>
                     <div class="settings-card">
@@ -149,6 +162,9 @@ export const MyTeam = {
     },
 
     setupEvents(container, currentTeam) {
+        // Seccion de instalacion: muestra u oculta segun plataforma y estado
+        this.setupInstallButton(container);
+
         const notifToggle = container.querySelector('#notifToggle');
         const remindToggle = container.querySelector('#remindToggle');
         const statusEl = container.querySelector('#notif-status');
@@ -288,6 +304,94 @@ export const MyTeam = {
                 await this.loadAllMatches(code);
             });
         });
+    },
+
+    // Gestiona el boton de instalacion segun plataforma
+    setupInstallButton(container) {
+        const section = container.querySelector('#install-section');
+        const btn = container.querySelector('#installAppBtn');
+        const desc = container.querySelector('#install-desc');
+        if (!section || !btn) return;
+
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        const isPWA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+        // Si ya esta instalada como PWA, ocultar la seccion
+        if (isPWA) { section.style.display = 'none'; return; }
+
+        if (isIOS) {
+            // iOS: boton que abre un modal con instrucciones visuales
+            btn.textContent = 'Como instalar';
+            if (desc) desc.textContent = 'Instrucciones para anadir a pantalla de inicio';
+            btn.addEventListener('click', () => this.showIOSInstallModal());
+        } else {
+            // Android/Chrome: disparar el prompt nativo si esta disponible
+            btn.addEventListener('click', () => {
+                document.dispatchEvent(new CustomEvent('mundial:install-requested'));
+            });
+            // Escuchar si el prompt se vuelve disponible para actualizar el boton
+            document.addEventListener('mundial:install-available', () => {
+                btn.disabled = false;
+                btn.textContent = 'Instalar';
+            }, { once: true });
+            // Si el prompt no esta disponible (ya instalado o no compatible), ocultar
+            document.addEventListener('mundial:install-not-available', () => {
+                section.style.display = 'none';
+            }, { once: true });
+            document.dispatchEvent(new CustomEvent('mundial:install-check'));
+        }
+    },
+
+    // Modal de instrucciones para iOS (no hay API directa)
+    showIOSInstallModal() {
+        if (document.getElementById('ios-install-modal')) return;
+        const modal = document.createElement('div');
+        modal.id = 'ios-install-modal';
+        modal.className = 'ios-install-modal';
+        modal.innerHTML = `
+            <div class="ios-install-overlay" id="ios-modal-overlay"></div>
+            <div class="ios-install-sheet">
+                <div class="ios-install-header">
+                    <span class="ios-install-title">Instalar Mundial 2026</span>
+                    <button class="ios-install-close" id="ios-modal-close">&#x2715;</button>
+                </div>
+                <div class="ios-install-steps">
+                    <div class="ios-install-step">
+                        <span class="ios-step-num">1</span>
+                        <div class="ios-step-text">
+                            <span class="ios-step-label">Toca el boton Compartir</span>
+                            <span class="ios-step-desc">El icono de cuadrado con flecha hacia arriba en la barra de Safari</span>
+                        </div>
+                        <svg class="ios-share-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="32" height="32">
+                            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+                            <polyline points="16 6 12 2 8 6"/>
+                            <line x1="12" y1="2" x2="12" y2="15"/>
+                        </svg>
+                    </div>
+                    <div class="ios-install-step">
+                        <span class="ios-step-num">2</span>
+                        <div class="ios-step-text">
+                            <span class="ios-step-label">Anadir a pantalla de inicio</span>
+                            <span class="ios-step-desc">Desplazate hacia abajo en el menu y toca esta opcion</span>
+                        </div>
+                    </div>
+                    <div class="ios-install-step">
+                        <span class="ios-step-num">3</span>
+                        <div class="ios-step-text">
+                            <span class="ios-step-label">Confirmar</span>
+                            <span class="ios-step-desc">Toca "Anadir" en la esquina superior derecha</span>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        document.body.appendChild(modal);
+        requestAnimationFrame(() => modal.classList.add('visible'));
+        const close = () => {
+            modal.classList.remove('visible');
+            setTimeout(() => modal.remove(), 300);
+        };
+        modal.querySelector('#ios-modal-close')?.addEventListener('click', close);
+        modal.querySelector('#ios-modal-overlay')?.addEventListener('click', close);
     },
 
     // Carga todos los partidos del equipo en el torneo.
