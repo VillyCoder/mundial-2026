@@ -231,7 +231,7 @@ html.light-mode .btn-icon .icon-sun  { display: none; }
 .stats-comp-header { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-xl); text-align: center; margin-bottom: var(--space-md); }
 .stats-comp-team { font-family: var(--font-heading); font-size: var(--font-size-base); color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; }
 .stats-comp-away { font-family: var(--font-heading); font-size: var(--font-size-base); color: var(--primary); text-transform: uppercase; letter-spacing: 0.08em; }
-.stats-comp-item { display: flex; flex-direction: column; gap: 5px; }
+.stats-comp-item { display: flex; flex-direction: column; gap: 8px; }
 .stats-comp-label { text-align: center; font-size: var(--font-size-xs); color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500; }
 .stats-comp-row { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; gap: var(--space-sm); }
 .stats-comp-val { font-family: var(--font-heading); font-size: var(--font-size-base); color: var(--text-primary); font-weight: 600; }

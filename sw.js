@@ -5,7 +5,7 @@
  * porque son en tiempo real; solo los archivos estaticos se cachean.
  */
 
-const CACHE_NAME = 'mundial-2026-v5';
+const CACHE_NAME = 'mundial-2026-v6';
 
 // Archivos de la interfaz que se guardan en cache al instalar la app
 const STATIC_ASSETS = [
