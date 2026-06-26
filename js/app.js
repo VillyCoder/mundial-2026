@@ -79,10 +79,13 @@ function showInstallBanner(isIOS) {
         banner.innerHTML = `
             <div class="install-banner-text">
                 <div class="install-banner-title">Instalar Mundial 2026</div>
-                <div class="install-banner-desc">Toca el boton <strong>Compartir</strong> (cuadrado con flecha hacia arriba) y luego <strong>Anadir a pantalla de inicio</strong></div>
+                <div class="install-banner-desc">Acceso directo desde tu pantalla de inicio</div>
             </div>
             <div class="install-banner-actions">
-                <button class="btn-install-dismiss" id="install-dismiss">Cerrar</button>
+                <button class="btn-install" id="install-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13" style="margin-right:5px;vertical-align:-1px"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>Añadir
+                </button>
+                <button class="btn-install-dismiss" id="install-dismiss">No</button>
             </div>`;
     } else {
         banner.innerHTML = `
@@ -105,7 +108,13 @@ function showInstallBanner(isIOS) {
         setTimeout(() => banner.remove(), 400);
     });
 
-    banner.querySelector('#install-btn')?.addEventListener('click', () => triggerInstall(banner));
+    banner.querySelector('#install-btn')?.addEventListener('click', async () => {
+        if (isIOSSafari() && 'share' in navigator) {
+            try { await navigator.share({ title: 'Mundial 2026', url: window.location.href }); } catch {}
+        } else {
+            triggerInstall(banner);
+        }
+    });
 }
 
 async function triggerInstall(bannerEl) {

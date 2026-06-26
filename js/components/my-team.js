@@ -320,10 +320,15 @@ export const MyTeam = {
         if (isPWA) { section.style.display = 'none'; return; }
 
         if (isIOS) {
-            // iOS: boton que abre un modal con instrucciones visuales
-            btn.textContent = 'Como instalar';
-            if (desc) desc.textContent = 'Instrucciones para anadir a pantalla de inicio';
-            btn.addEventListener('click', () => this.showIOSInstallModal());
+            btn.textContent = 'Añadir a inicio';
+            if (desc) desc.textContent = 'Abre el menu de compartir para instalar la app';
+            btn.addEventListener('click', async () => {
+                if ('share' in navigator) {
+                    try { await navigator.share({ title: 'Mundial 2026', url: window.location.href }); } catch {}
+                } else {
+                    this.showIOSInstallModal();
+                }
+            });
         } else {
             // Android/Chrome: disparar el prompt nativo si esta disponible
             btn.addEventListener('click', () => {
