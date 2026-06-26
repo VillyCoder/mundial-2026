@@ -69,6 +69,16 @@ html.light-mode .bg-orb-3 {
     background: radial-gradient(circle, rgba(21,101,192,0.12) 0%, rgba(21,101,192,0.03) 45%, transparent 70%);
 }
 
+/* Pulso sutil del gradiente dorado superior para dar vida al fondo */
+body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: radial-gradient(ellipse at 70% -5%, rgba(212,175,55,0.10) 0%, transparent 55%);
+    animation: bodyBreath 9s ease-in-out infinite alternate;
+    pointer-events: none;
+    z-index: 0;
+}
+
 h1, h2, h3, h4 { font-family: var(--font-heading); letter-spacing: 0.04em; font-weight: 400; }
 a { color: inherit; text-decoration: none; }
 button { font-family: inherit; cursor: pointer; border: none; background: none; }

@@ -305,7 +305,7 @@ html.light-mode .btn-icon .icon-sun  { display: none; }
 .cal-match-info { display: flex; gap: var(--space-sm); font-size: var(--font-size-xs); color: var(--text-muted); justify-content: center; }
 .cal-stage { font-family: var(--font-heading); font-weight: 600; color: var(--primary); text-transform: uppercase; }
 
-.standings-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-lg); max-width: 1320px; margin: 0 auto; }
+.standings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(560px, 1fr)); gap: var(--space-lg); max-width: 1400px; margin: 0 auto; }
 .standings-group-card { background: var(--bg-card); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); }
 .standings-group-header { padding: var(--space-md) var(--space-lg); background: var(--stage-tag-bg); border-bottom: 1px solid rgba(212,175,55,0.14); }
 .standings-group-name { font-family: var(--font-heading); font-size: var(--font-size-base); color: var(--primary); text-transform: uppercase; letter-spacing: 0.12em; }
@@ -458,6 +458,20 @@ html.light-mode .btn-icon .icon-sun  { display: none; }
 .notif-status:not(:empty) { padding: var(--space-sm) var(--space-md); }
 .notif-status.ok { background: rgba(0,160,100,0.12); color: #007A4D; border-left: 2px solid #007A4D; }
 .notif-status.error { background: rgba(200,16,46,0.10); color: var(--accent); border-left: 2px solid var(--accent); }
+.notif-status.info { background: rgba(21,101,192,0.10); color: #1565C0; border-left: 2px solid #1565C0; }
+html:not(.light-mode) .notif-status.info { color: #90CAF9; border-left-color: #90CAF9; }
+
+/* Banner de instalacion PWA — aparece desde abajo en movil */
+.install-banner { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg-card); border-top: 1px solid var(--border); padding: var(--space-md) var(--space-lg); display: flex; align-items: center; gap: var(--space-md); z-index: 300; box-shadow: 0 -4px 24px rgba(0,0,0,0.30); transform: translateY(100%); transition: transform 0.35s ease; }
+.install-banner.visible { transform: translateY(0); }
+.install-banner-text { flex: 1; }
+.install-banner-title { font-family: var(--font-heading); color: var(--text-primary); font-size: var(--font-size-base); text-transform: uppercase; letter-spacing: 0.06em; }
+.install-banner-desc { color: var(--text-secondary); font-size: var(--font-size-sm); margin-top: 4px; line-height: 1.45; }
+.install-banner-actions { display: flex; gap: var(--space-sm); align-items: center; flex-shrink: 0; }
+.btn-install { background: var(--primary); color: #000; font-family: var(--font-heading); font-size: var(--font-size-sm); padding: 8px 16px; border-radius: var(--radius-md); font-weight: 600; letter-spacing: 0.04em; }
+.btn-install:hover { opacity: 0.85; }
+.btn-install-dismiss { color: var(--text-muted); font-size: var(--font-size-sm); padding: 8px; }
+.btn-install-dismiss:hover { color: var(--text-primary); }
 
 .teams-page { max-width: 900px; margin: 0 auto; }
 .teams-group { margin-bottom: var(--space-xl); }
@@ -506,7 +520,7 @@ html.light-mode .btn-icon .icon-sun  { display: none; }
     .matches-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
     .home-matches { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
 }
-@media (max-width: 1200px) { .standings-grid { grid-template-columns: repeat(2, 1fr); max-width: 100%; } }
+@media (max-width: 1200px) { .standings-grid { grid-template-columns: repeat(auto-fill, minmax(480px, 1fr)); max-width: 100%; } }
 @media (max-width: 768px) {
     .menu-toggle { display: flex; }
     .brand-text { font-size: 1.4rem; }
@@ -549,4 +563,10 @@ html.light-mode .btn-icon .icon-sun  { display: none; }
     .filter-btn, .day-tab, .phase-tab { padding: 6px 10px; font-size: 11px; }
     .cal-widget { padding: var(--space-md); }
     .nav-item { padding: 12px var(--space-md); }
+    /* Hero responsive: menos altura y fuente más pequeña en movil */
+    .hero-banner { height: auto; padding: var(--space-lg) var(--space-md); }
+    .hero-content { flex-direction: column; gap: var(--space-md); }
+    .hero-logo { width: 52px; height: 52px; }
+    .hero-text h1 { font-size: var(--font-size-xl); }
+    .hero-text p { font-size: var(--font-size-sm); }
 }

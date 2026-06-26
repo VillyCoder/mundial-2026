@@ -24,10 +24,94 @@ import { getFavoriteTeam } from './config.js';
 
 const router = new Router();
 
+// Detecta si el usuario esta en un iPhone/iPad/iPod
+function isIOSSafari() {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+}
+
+// Detecta si la app ya esta instalada como PWA (modo standalone)
+function isStandalone() {
+    return window.matchMedia('(display-mode: standalone)').matches
+        || window.navigator.standalone === true;
+}
+
+// Prompt nativo de instalacion en Chrome/Android (se captura antes de que el navegador lo muestre)
+let deferredInstallPrompt = null;
+
+// Muestra el banner de instalacion segun la plataforma
+function initInstallBanner() {
+    if (isStandalone()) return;
+    if (sessionStorage.getItem('install_dismissed')) return;
+
+    if (isIOSSafari()) {
+        // iOS no tiene beforeinstallprompt — mostramos instrucciones manuales solo en movil
+        if (window.innerWidth <= 768) showInstallBanner(true);
+        return;
+    }
+
+    // Chrome / Android: capturamos el evento del navegador
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredInstallPrompt = e;
+        showInstallBanner(false);
+    });
+}
+
+function showInstallBanner(isIOS) {
+    if (document.getElementById('install-banner')) return;
+
+    const banner = document.createElement('div');
+    banner.id = 'install-banner';
+    banner.className = 'install-banner';
+
+    if (isIOS) {
+        banner.innerHTML = `
+            <div class="install-banner-text">
+                <div class="install-banner-title">Instalar Mundial 2026</div>
+                <div class="install-banner-desc">Toca el boton <strong>Compartir</strong> (cuadrado con flecha hacia arriba) y luego <strong>Anadir a pantalla de inicio</strong></div>
+            </div>
+            <div class="install-banner-actions">
+                <button class="btn-install-dismiss" id="install-dismiss">Cerrar</button>
+            </div>`;
+    } else {
+        banner.innerHTML = `
+            <div class="install-banner-text">
+                <div class="install-banner-title">Instalar Mundial 2026</div>
+                <div class="install-banner-desc">Disponible como app — acceso directo sin navegador</div>
+            </div>
+            <div class="install-banner-actions">
+                <button class="btn-install" id="install-btn">Instalar</button>
+                <button class="btn-install-dismiss" id="install-dismiss">No</button>
+            </div>`;
+    }
+
+    document.body.appendChild(banner);
+    requestAnimationFrame(() => banner.classList.add('visible'));
+
+    banner.querySelector('#install-dismiss')?.addEventListener('click', () => {
+        banner.classList.remove('visible');
+        sessionStorage.setItem('install_dismissed', '1');
+        setTimeout(() => banner.remove(), 400);
+    });
+
+    banner.querySelector('#install-btn')?.addEventListener('click', async () => {
+        if (!deferredInstallPrompt) return;
+        deferredInstallPrompt.prompt();
+        const { outcome } = await deferredInstallPrompt.userChoice;
+        deferredInstallPrompt = null;
+        if (outcome === 'accepted') {
+            banner.classList.remove('visible');
+            setTimeout(() => banner.remove(), 400);
+        }
+    });
+}
+
 // Inicializa la app cuando el DOM esta listo
 function init() {
     Header.render(document.getElementById('header'));
     Sidebar.render(document.getElementById('sidebar'));
+
+    initInstallBanner();
 
     // Arranca las notificaciones si el usuario las tiene activadas
     const fav = getFavoriteTeam();
@@ -200,7 +284,20 @@ document.addEventListener('click', async (e) => {
     const result = await NotificationSystem.toggleAlert(matchId, matchInfo);
 
     if (result === null) {
-        showToast('Activa las notificaciones del navegador para usar alertas');
+        let msg;
+        if (isIOSSafari()) {
+            if (!isStandalone()) {
+                msg = 'En iPhone, instala la app para recibir alertas de partido';
+            } else if (!('Notification' in window)) {
+                msg = 'Necesitas iOS 16.4 o superior para usar alertas';
+            } else {
+                // iOS 16.4+ PWA con permiso denegado
+                msg = 'Ve a Ajustes del iPhone → la app → Notificaciones para activarlas';
+            }
+        } else {
+            msg = 'Activa las notificaciones del navegador para usar alertas';
+        }
+        showToast(msg);
         return;
     }
 

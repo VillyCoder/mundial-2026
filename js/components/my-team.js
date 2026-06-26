@@ -153,12 +153,35 @@ export const MyTeam = {
         const remindToggle = container.querySelector('#remindToggle');
         const statusEl = container.querySelector('#notif-status');
 
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        const isPWA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
         const updateStatus = () => {
             if (!statusEl) return;
+
+            // iOS en Safari normal: las notificaciones web solo funcionan en la PWA instalada
+            if (isIOS && !isPWA) {
+                statusEl.innerHTML = 'Para recibir notificaciones, instala la app: toca <strong>Compartir</strong> (cuadrado con flecha) y luego <strong>Anadir a pantalla de inicio</strong>.';
+                statusEl.className = 'notif-status info';
+                if (notifToggle) notifToggle.disabled = true;
+                if (remindToggle) remindToggle.disabled = true;
+                return;
+            }
+
             if (!('Notification' in window)) {
-                statusEl.textContent = 'Tu navegador no soporta notificaciones.';
+                statusEl.textContent = isIOS
+                    ? 'Necesitas iOS 16.4 o superior para recibir notificaciones.'
+                    : 'Tu navegador no soporta notificaciones.';
                 statusEl.className = 'notif-status error';
-            } else if (Notification.permission === 'denied') {
+                if (notifToggle) notifToggle.disabled = true;
+                if (remindToggle) remindToggle.disabled = true;
+                return;
+            }
+
+            if (notifToggle) notifToggle.disabled = false;
+            if (remindToggle) remindToggle.disabled = false;
+
+            if (Notification.permission === 'denied') {
                 statusEl.textContent = 'Notificaciones bloqueadas. Cambialo en los ajustes del navegador.';
                 statusEl.className = 'notif-status error';
             } else if (Notification.permission === 'granted' && Storage.get('notifications')) {
@@ -195,7 +218,9 @@ export const MyTeam = {
 
         container.querySelector('#testNotifBtn')?.addEventListener('click', async () => {
             if (!('Notification' in window)) {
-                statusEl.textContent = 'Tu navegador no soporta notificaciones.';
+                statusEl.textContent = isIOS
+                    ? 'Necesitas iOS 16.4 o superior para recibir notificaciones.'
+                    : 'Tu navegador no soporta notificaciones.';
                 statusEl.className = 'notif-status error';
                 return;
             }

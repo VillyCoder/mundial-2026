@@ -43,6 +43,12 @@
     to   { opacity: 1; transform: translateY(0); }
 }
 
+/* Respiracion del gradiente del body — pulso muy sutil */
+@keyframes bodyBreath {
+    from { opacity: 0.5; }
+    to   { opacity: 1; }
+}
+
 /* Orbes de fondo — movimiento lento GPU-acelerado */
 @keyframes orbDrift1 {
     from { transform: translate(0, 0) scale(1); }
