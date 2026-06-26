@@ -412,14 +412,16 @@ export const MatchDetail = {
                 const total = hv + av;
                 const hp = total > 0 ? Math.round((hv / total) * 100) : 50;
                 return `
-                <div class="stats-comp-row">
-                    <span class="stats-comp-val left">${hv}</span>
-                    <div class="stats-comp-bar">
-                        <div class="stats-comp-fill home" style="width:${hp}%;background:${homeColor}"></div>
-                        <span class="stats-comp-label">${statLabels[key] || key}</span>
-                        <div class="stats-comp-fill away" style="width:${100 - hp}%;background:${awayColor}"></div>
+                <div class="stats-comp-item">
+                    <span class="stats-comp-label">${statLabels[key] || key}</span>
+                    <div class="stats-comp-row">
+                        <span class="stats-comp-val left">${hv}</span>
+                        <div class="stats-comp-bar">
+                            <div class="stats-comp-fill home" style="width:${hp}%;background:${homeColor}"></div>
+                            <div class="stats-comp-fill away" style="background:${awayColor}"></div>
+                        </div>
+                        <span class="stats-comp-val right">${av}</span>
                     </div>
-                    <span class="stats-comp-val right">${av}</span>
                 </div>`;
             }).join('')}
         </div>`;
