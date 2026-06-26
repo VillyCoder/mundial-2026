@@ -597,7 +597,11 @@ html:not(.light-mode) .notif-status.info { color: #90CAF9; border-left-color: #9
     .pitch-grid { grid-template-columns: 1fr; }
     .pitch { max-width: 240px; }
     .pitch-player-dot { width: 24px; height: 24px; font-size: 10px; }
-    .stats-comp-row { grid-template-columns: 44px 1fr 44px; }
+    .stats-comparison { gap: var(--space-sm); }
+    .stats-comp-row { grid-template-columns: 36px 1fr 36px; gap: 6px; }
+    .stats-comp-val { font-size: var(--font-size-sm); }
+    .stats-comp-label { font-size: 10px; letter-spacing: 0.04em; }
+    .stats-comp-bar { height: 8px; }
     .detail-score { gap: var(--space-md); }
     .detail-score-val { font-size: 36px; }
     .detail-score-sep { font-size: 28px; }
