@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Mundial 2026 - En Vivo</title>
+
+    <!-- Por defecto modo claro; solo cambia a oscuro si el usuario lo eligio -->
+    <script>
+        if (localStorage.getItem('mundial-tema') !== 'oscuro') {
+            document.documentElement.classList.add('light-mode');
+        }
+    </script>
+
+    <!-- PWA: icono, splash y color de barra de estado -->
+    <link rel="icon" type="image/png" href="https://a.espncdn.com/i/leaguelogos/soccer/500/4.png">
+    <link rel="apple-touch-icon" href="https://a.espncdn.com/i/leaguelogos/soccer/500/4.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#F5F2ED">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Mundial 26">
+    <meta name="description" content="Seguimiento en tiempo real de la Copa del Mundo FIFA 2026">
+
+    <link rel="stylesheet" href="css/variables.css?v=17">
+    <link rel="stylesheet" href="css/base.css?v=17">
+    <link rel="stylesheet" href="css/layout.css?v=17">
+    <link rel="stylesheet" href="css/components.css?v=17">
+    <link rel="stylesheet" href="css/animations.css?v=17">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="bg-orb bg-orb-1" aria-hidden="true"></div>
+    <div class="bg-orb bg-orb-2" aria-hidden="true"></div>
+    <div class="bg-orb bg-orb-3" aria-hidden="true"></div>
+    <div id="app">
+        <header id="header"></header>
+        <aside id="sidebar"></aside>
+        <div id="sidebarOverlay"></div>
+        <main id="content"></main>
+    </div>
+    <script type="module" src="js/app.js?v=9"></script>
+    <script>
+        // Registra el Service Worker para que la app sea instalable (PWA)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(() => {});
+        }
+    </script>
+</body>
+</html>

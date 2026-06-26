@@ -1,0 +1,149 @@
+/* === TEMA OSCURO (por defecto) — Carbón Premium === */
+:root {
+    /* Colores de marca */
+    --primary: #D4AF37;
+    --primary-dark: #B89328;
+    --secondary: #1565C0;
+    --accent: #C8102E;
+    --accent-dark: #A50C25;
+    --gold: #D4AF37;
+    --spain-red: #C8102E;
+    --spain-gold: #D4AF37;
+
+    /* Fondos principales */
+    --bg-body: #1A1A1D;
+    --bg-surface: #252529;
+    --bg-card: rgba(37, 37, 41, 0.85);
+    --bg-card-hover: rgba(50, 50, 55, 0.95);
+    --bg-header: rgba(26, 26, 29, 0.92);
+    --bg-sidebar: rgba(26, 26, 29, 0.98);
+
+    /* Fondos de cristal por nivel de opacidad */
+    --bg-glass-sm: rgba(255, 255, 255, 0.06);
+    --bg-glass-md: rgba(37, 37, 41, 0.65);
+    --bg-glass-lg: rgba(26, 26, 29, 0.88);
+    --bg-glass-hover: rgba(50, 50, 55, 0.80);
+
+    /* Tarjetas especiales */
+    --card-bg-live: rgba(200, 16, 46, 0.10);
+    --card-bg-fav: rgba(212, 175, 55, 0.10);
+    --card-border-live: rgba(200, 16, 46, 0.50);
+    --card-border-fav: rgba(212, 175, 55, 0.50);
+
+    /* Textos */
+    --text-primary: #E8E6E3;
+    --text-secondary: #B0ADA9;
+    --text-muted: #908D8A;
+
+    /* Bordes */
+    --away-color: #3B82F6;
+    --border: rgba(255, 255, 255, 0.07);
+    --border-hover: rgba(212, 175, 55, 0.55);
+
+    /* Efectos de cristal */
+    --glass-blur: blur(20px);
+    --inset-hl: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    --btn-hover-bg: rgba(255, 255, 255, 0.08);
+    --row-hover-bg: rgba(255, 255, 255, 0.04);
+
+    /* Sombras */
+    --shadow-sm: 0 2px 16px rgba(0, 0, 0, 0.40);
+    --shadow-md: 0 6px 32px rgba(0, 0, 0, 0.50);
+    --shadow-glow-gold: 0 0 28px rgba(212, 175, 55, 0.22), 0 6px 24px rgba(0, 0, 0, 0.40);
+    --shadow-glow-red: 0 0 22px rgba(200, 16, 46, 0.30);
+
+    /* Variables de componentes */
+    --stat-bar-bg: rgba(255, 255, 255, 0.12);
+    --comp-label-bg: rgba(26, 26, 29, 0.92);
+    --nav-hover-bg: rgba(255, 255, 255, 0.06);
+    --nav-active-bg: rgba(212, 175, 55, 0.14);
+    --nav-active-border: rgba(212, 175, 55, 0.30);
+    --stage-tag-bg: rgba(212, 175, 55, 0.14);
+    --hero-border: rgba(212, 175, 55, 0.28);
+    --modal-overlay-bg: rgba(0, 0, 0, 0.75);
+    --hero-bg: linear-gradient(155deg, rgba(212,175,55,0.22) 0%, rgba(37,37,41,0.75) 55%, rgba(26,26,29,0.90) 100%);
+    --facts-bg: linear-gradient(160deg, rgba(37,37,41,0.80) 0%, rgba(26,26,29,0.90) 100%);
+
+    /* Espaciado */
+    --space-xs: 6px;
+    --space-sm: 10px;
+    --space-md: 18px;
+    --space-lg: 28px;
+    --space-xl: 40px;
+    --space-2xl: 56px;
+
+    /* Tipografía */
+    --font-heading: 'Bebas Neue', 'Impact', sans-serif;
+    --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-size-xs: 0.8rem;
+    --font-size-sm: 0.9rem;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.15rem;
+    --font-size-xl: 1.5rem;
+    --font-size-2xl: 2rem;
+    --font-size-3xl: 2.8rem;
+
+    /* Radios */
+    --radius-sm: 8px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 18px;
+    --radius-full: 9999px;
+
+    /* Layout */
+    --sidebar-width: 260px;
+    --header-height: 58px;
+}
+
+/* === TEMA CLARO — Arena Elegante === */
+html.light-mode {
+    --primary: #B89656;
+    --primary-dark: #8A7040;
+    --gold: #B89656;
+    --spain-gold: #B89656;
+
+    --bg-body: #F5F2ED;
+    --bg-surface: #EBE6DF;
+    --bg-card: rgba(235, 230, 223, 0.92);
+    --bg-card-hover: rgba(248, 244, 240, 0.98);
+    --bg-header: rgba(255, 255, 255, 0.92);
+    --bg-sidebar: rgba(248, 244, 240, 0.98);
+
+    --bg-glass-sm: rgba(0, 0, 0, 0.05);
+    --bg-glass-md: rgba(255, 255, 255, 0.55);
+    --bg-glass-lg: rgba(255, 255, 255, 0.72);
+    --bg-glass-hover: rgba(0, 0, 0, 0.09);
+
+    --card-bg-live: rgba(255, 248, 248, 0.92);
+    --card-bg-fav: rgba(255, 252, 235, 0.92);
+    --card-border-live: rgba(200, 16, 46, 0.45);
+    --card-border-fav: rgba(184, 150, 86, 0.50);
+
+    --away-color: #3B82F6;
+    --text-primary: #2C2621;
+    --text-secondary: #5C544E;
+    --text-muted: #6B635A;
+
+    --border: rgba(0, 0, 0, 0.09);
+    --border-hover: rgba(184, 150, 86, 0.65);
+
+    --inset-hl: inset 0 1px 0 rgba(255, 255, 255, 0.80);
+    --btn-hover-bg: rgba(0, 0, 0, 0.07);
+    --row-hover-bg: rgba(0, 0, 0, 0.04);
+
+    --shadow-sm: 0 2px 16px rgba(0, 0, 0, 0.10);
+    --shadow-md: 0 6px 32px rgba(0, 0, 0, 0.15);
+    --shadow-glow-gold: 0 0 28px rgba(184, 150, 86, 0.28), 0 6px 24px rgba(0, 0, 0, 0.12);
+    --shadow-glow-red: 0 0 22px rgba(200, 16, 46, 0.18);
+
+    --stat-bar-bg: rgba(0, 0, 0, 0.12);
+    --comp-label-bg: rgba(235, 230, 223, 0.95);
+    --nav-hover-bg: rgba(0, 0, 0, 0.05);
+    --nav-active-bg: rgba(184, 150, 86, 0.14);
+    --nav-active-border: rgba(184, 150, 86, 0.30);
+    --stage-tag-bg: rgba(184, 150, 86, 0.12);
+    --hero-border: rgba(184, 150, 86, 0.24);
+    --modal-overlay-bg: rgba(80, 70, 60, 0.55);
+    --hero-bg: linear-gradient(155deg, rgba(255,255,255,0.72) 0%, rgba(255,250,225,0.50) 100%);
+    --facts-bg: linear-gradient(160deg, rgba(255,255,255,0.65) 0%, rgba(255,250,225,0.45) 100%);
+}
