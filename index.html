@@ -10,7 +10,7 @@
 
     <!-- Por defecto modo claro; solo cambia a oscuro si el usuario lo eligio -->
     <script>
-        if (localStorage.getItem('mundial-tema') !== 'oscuro') {
+        if (localStorage.getItem('mundial-tema') === 'claro') {
             document.documentElement.classList.add('light-mode');
         }
     </script>
