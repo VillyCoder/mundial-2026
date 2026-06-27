@@ -364,18 +364,26 @@ const handler = async (req, res) => {
                 const scoreboardData = await fetchJSON(dateParam ? `${ESPN_BASE}/scoreboard?dates=${dateParam}` : `${ESPN_BASE}/scoreboard`);
                 event = (scoreboardData.events || []).find(e => e.id === gameId);
             } catch (_) {}
-            // Fallback +1 dia: el partido puede estar en ESPN bajo la fecha UTC siguiente
+            // Fallbacks por desfase de zona horaria: ESPN usa EDT (UTC-4) para archivar partidos,
+            // por lo que un partido a medianoche UTC puede aparecer en la fecha del dia anterior.
+            // Probamos -1 y +1 en paralelo para cubrir ambas direcciones.
             if (!event && dateParam && dateParam.length === 8) {
                 try {
                     const y = parseInt(dateParam.slice(0, 4));
                     const mo = parseInt(dateParam.slice(4, 6)) - 1;
                     const d = parseInt(dateParam.slice(6, 8));
-                    const next = new Date(Date.UTC(y, mo, d + 1));
-                    const nextStr = next.getUTCFullYear().toString()
-                        + String(next.getUTCMonth() + 1).padStart(2, '0')
-                        + String(next.getUTCDate()).padStart(2, '0');
-                    const nextData = await fetchJSON(`${ESPN_BASE}/scoreboard?dates=${nextStr}`);
-                    event = (nextData.events || []).find(e => e.id === gameId);
+                    const fmtUTC = dt => dt.getUTCFullYear().toString()
+                        + String(dt.getUTCMonth() + 1).padStart(2, '0')
+                        + String(dt.getUTCDate()).padStart(2, '0');
+                    const prevStr = fmtUTC(new Date(Date.UTC(y, mo, d - 1)));
+                    const nextStr = fmtUTC(new Date(Date.UTC(y, mo, d + 1)));
+                    const [prevData, nextData] = await Promise.all([
+                        fetchJSON(`${ESPN_BASE}/scoreboard?dates=${prevStr}`).catch(() => null),
+                        fetchJSON(`${ESPN_BASE}/scoreboard?dates=${nextStr}`).catch(() => null)
+                    ]);
+                    event = (prevData?.events || []).find(e => e.id === gameId)
+                         || (nextData?.events || []).find(e => e.id === gameId)
+                         || null;
                 } catch (_) {}
             }
             // Fallback: scoreboard en vivo (sin fecha) para partidos en curso
