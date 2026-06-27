@@ -474,6 +474,8 @@ const handler = async (req, res) => {
                 teamStats,
                 odds: comp?.odds?.[0] || null,
                 source: 'espn',
+                homeId: homeComp?.team?.id || '',
+                awayId: awayComp?.team?.id || '',
                 homeTeam: translateTeam(homeComp?.team?.displayName || 'Local'),
                 awayTeam: translateTeam(awayComp?.team?.displayName || 'Visitante'),
                 homeCode: homeComp?.team?.abbreviation || '',
