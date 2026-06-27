@@ -387,20 +387,48 @@ export const MatchDetail = {
 
     renderStats(m) {
         if (!m.teamStats?.length) return '<div class="no-data">Sin estadisticas</div>';
-        const statLabels = {
-            PP: 'Posesion %', FC: 'Faltas', CW: 'Corners', SOG: 'Tiros a puerta',
-            SHOT: 'Tiros totales', G: 'Goles', A: 'Asistencias', SHAST: 'Asist. tiro',
-            APP: 'Apariciones'
-        };
-        const homeTeam = m.teamStats.find(t => t.id === m.homeId || t.code === m.homeCode);
-        const awayTeam = m.teamStats.find(t => t.id === m.awayId || t.code === m.awayCode);
-        if (!homeTeam || !awayTeam) return '<div class="no-data">Sin estadisticas</div>';
 
-        const allKeys = [...new Set([
-            ...homeTeam.statistics.map(s => s.abbreviation),
-            ...awayTeam.statistics.map(s => s.abbreviation)
-        ])];
-        const displayStats = ['PP', 'SOG', 'SHOT', 'CW', 'FC', 'A'];
+        // Etiquetas para abreviaturas del scoreboard Y nombres del endpoint summary
+        const statLabels = {
+            PP: 'Posesion %', possessionPct: 'Posesion %',
+            SOG: 'Tiros a puerta', shotsOnTarget: 'Tiros a puerta',
+            SHOT: 'Tiros totales', totalShots: 'Tiros totales',
+            CW: 'Corners', corners: 'Corners',
+            FC: 'Faltas', fouls: 'Faltas',
+            yellowCards: 'Tarjetas amarillas', redCards: 'Tarjetas rojas',
+            offsides: 'Fueras de juego', saves: 'Paradas',
+            A: 'Asistencias', G: 'Goles'
+        };
+
+        // Busca equipo por ID, luego por codigo — si no coincide usa posicion en array
+        const homeTeam = m.teamStats.find(t => t.id === m.homeId || t.code === m.homeCode)
+                      || m.teamStats[0];
+        const awayTeam = m.teamStats.find(t => t.id === m.awayId || t.code === m.awayCode)
+                      || m.teamStats[1];
+        if (!homeTeam || !awayTeam || homeTeam === awayTeam) return '<div class="no-data">Sin estadisticas</div>';
+
+        // Busca un stat por abbreviation o por name (cubre ambos formatos de ESPN)
+        const findStat = (stats, key) =>
+            stats.find(s => s.abbreviation === key || s.name === key);
+
+        // Prioridad: abreviaturas del scoreboard primero, nombres del summary como alias
+        const displayStats = ['PP', 'possessionPct', 'SOG', 'shotsOnTarget',
+                              'SHOT', 'totalShots', 'CW', 'corners', 'FC', 'fouls',
+                              'offsides', 'saves', 'yellowCards'];
+
+        // Deduplica: si ya tenemos "PP" no mostramos "possessionPct"
+        const shown = new Set();
+        const statsToRender = displayStats.filter(key => {
+            const h = findStat(homeTeam.statistics, key);
+            const a = findStat(awayTeam.statistics, key);
+            if (!h && !a) return false;
+            const label = statLabels[key] || key;
+            if (shown.has(label)) return false;
+            shown.add(label);
+            return true;
+        });
+
+        if (!statsToRender.length) return '<div class="no-data">Sin estadisticas</div>';
 
         const homeColor = ensureVisibleColor(m.homeColor) || '#E53E3E';
         const awayColor = ensureVisibleColor(m.awayColor) || '#3182CE';
@@ -411,9 +439,9 @@ export const MatchDetail = {
                 <span class="stats-comp-team" style="color:${homeColor}">${m.homeTeam}</span>
                 <span class="stats-comp-away" style="color:${awayColor}">${m.awayTeam}</span>
             </div>
-            ${displayStats.map(key => {
-                const hStat = homeTeam.statistics.find(s => s.abbreviation === key);
-                const aStat = awayTeam.statistics.find(s => s.abbreviation === key);
+            ${statsToRender.map(key => {
+                const hStat = findStat(homeTeam.statistics, key);
+                const aStat = findStat(awayTeam.statistics, key);
                 const hv = parseFloat(hStat?.displayValue) || 0;
                 const av = parseFloat(aStat?.displayValue) || 0;
                 const total = hv + av;
@@ -422,12 +450,12 @@ export const MatchDetail = {
                 <div class="stats-comp-item">
                     <span class="stats-comp-label">${statLabels[key] || key}</span>
                     <div class="stats-comp-row">
-                        <span class="stats-comp-val left">${hv}</span>
+                        <span class="stats-comp-val left">${hStat?.displayValue ?? hv}</span>
                         <div class="stats-comp-bar">
                             <div class="stats-comp-fill home" style="width:${hp}%;background:${homeColor}"></div>
                             <div class="stats-comp-fill away" style="background:${awayColor}"></div>
                         </div>
-                        <span class="stats-comp-val right">${av}</span>
+                        <span class="stats-comp-val right">${aStat?.displayValue ?? av}</span>
                     </div>
                 </div>`;
             }).join('')}
