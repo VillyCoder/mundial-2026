@@ -230,6 +230,18 @@ function toMadridTime(isoDate) {
     });
 }
 
+// Devuelve la fecha en Madrid como cadena YYYYMMDD (para agrupar partidos por dia local)
+function toMadridDate(isoDate) {
+    if (!isoDate) return '';
+    const p = new Intl.DateTimeFormat('es-ES', {
+        timeZone: 'Europe/Madrid',
+        year: 'numeric', month: '2-digit', day: '2-digit'
+    }).formatToParts(new Date(isoDate));
+    return p.find(x => x.type === 'year').value
+         + p.find(x => x.type === 'month').value
+         + p.find(x => x.type === 'day').value;
+}
+
 function teamLogoUrl(team) {
     if (!team?.logo) return '';
     return team.logo;
@@ -293,7 +305,7 @@ function normalizeESPNMatch(event) {
     const awayStats = extractTeamStats(away);
     const odds = comp?.odds?.[0] || null;
     return {
-        id: event.id, date: event.date, dateMadrid: toMadridTime(event.date),
+        id: event.id, date: event.date, dateMadrid: toMadridTime(event.date), dateMadridDate: toMadridDate(event.date),
         homeTeam, awayTeam,
         homeId: home?.team?.id || '', awayId: away?.team?.id || '',
         homeCode: home?.team?.abbreviation || '???', awayCode: away?.team?.abbreviation || '???',
@@ -348,11 +360,17 @@ const handler = async (req, res) => {
         try {
             // Try to get scoreboard data for the match (includes details/events with athletes)
             let event = null;
-            const scoreUrl = dateParam ? `${ESPN_BASE}/scoreboard?dates=${dateParam}` : `${ESPN_BASE}/scoreboard`;
             try {
-                const scoreboardData = await fetchJSON(scoreUrl);
+                const scoreboardData = await fetchJSON(dateParam ? `${ESPN_BASE}/scoreboard?dates=${dateParam}` : `${ESPN_BASE}/scoreboard`);
                 event = (scoreboardData.events || []).find(e => e.id === gameId);
-            } catch (_) { /* scoreboard may not have this match */ }
+            } catch (_) {}
+            // Fallback: scoreboard en vivo (sin fecha) para partidos en curso
+            if (!event && dateParam) {
+                try {
+                    const liveData = await fetchJSON(`${ESPN_BASE}/scoreboard`);
+                    event = (liveData.events || []).find(e => e.id === gameId);
+                } catch (_) {}
+            }
             const comp = event?.competitions?.[0];
 
             // Get play-by-play from core API (filter to important events only)
@@ -403,7 +421,7 @@ const handler = async (req, res) => {
             const competitors = comp?.competitors || [];
             const homeComp = competitors.find(c => c.homeAway === 'home') || competitors[0];
             const awayComp = competitors.find(c => c.homeAway === 'away') || competitors[1];
-            const teamStats = competitors.map(c => ({
+            let teamStats = competitors.map(c => ({
                 id: c.team?.id || '',
                 name: c.team?.displayName || '',
                 code: c.team?.abbreviation || '',
@@ -412,6 +430,26 @@ const handler = async (req, res) => {
                 leaders: c.leaders || [],
                 form: c.form || ''
             }));
+
+            // Si el scoreboard no tiene estadisticas (habitual en partidos en vivo),
+            // usar el endpoint summary que las devuelve en tiempo real
+            const hasStats = teamStats.some(t => t.statistics.length > 0);
+            if (!hasStats) {
+                try {
+                    const summaryData = await fetchJSON(`https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/summary?event=${gameId}`);
+                    const summaryTeams = summaryData?.boxscore?.teams || [];
+                    if (summaryTeams.length) {
+                        teamStats = summaryTeams.map(t => ({
+                            id: t.team?.id || '',
+                            name: translateTeam(t.team?.displayName || ''),
+                            code: t.team?.abbreviation || '',
+                            logo: t.team?.logo || '',
+                            statistics: t.statistics || [],
+                            leaders: []
+                        }));
+                    }
+                } catch (_) {}
+            }
 
             const statusState = comp?.status?.type?.state;
             res.writeHead(200, { 'Content-Type': 'application/json' });

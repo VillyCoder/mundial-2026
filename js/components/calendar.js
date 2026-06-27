@@ -138,9 +138,16 @@ export const Calendar = {
                 const batch = datesToLoad.slice(i, i + batchSize);
                 const results = await Promise.all(batch.map(d => Scraper.getCalendar(d)));
                 results.forEach((data, idx) => {
-                    const dateKey = batch[idx];
-                    this.matchesByDate[dateKey] = data?.matches || [];
-                    this.loadedDates.add(dateKey);
+                    const fallbackKey = batch[idx];
+                    // Agrupa por fecha Madrid del partido (no por fecha UTC de ESPN)
+                    (data?.matches || []).forEach(match => {
+                        const key = match.dateMadridDate || fallbackKey;
+                        if (!this.matchesByDate[key]) this.matchesByDate[key] = [];
+                        if (!this.matchesByDate[key].find(m => m.id === match.id)) {
+                            this.matchesByDate[key].push(match);
+                        }
+                    });
+                    this.loadedDates.add(fallbackKey);
                 });
             }
         }

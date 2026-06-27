@@ -23,14 +23,19 @@ const STAGE_NAMES = {
     'Third Place': 'Tercer puesto', 'Final': 'FINAL'
 };
 
-// Devuelve las fechas de hoy y mañana en formato YYYYMMDD para la API de ESPN
+// Devuelve la fecha de hoy en formato YYYYMMDD en hora de Madrid
 function getMatchDates() {
-    const now = new Date();
-    const fmt = d => d.toISOString().split('T')[0].replace(/-/g, '');
-    return {
-        today: fmt(now),
-        tomorrow: fmt(new Date(now.getTime() + 86400000))
+    const madridDate = d => {
+        const p = new Intl.DateTimeFormat('es-ES', {
+            timeZone: 'Europe/Madrid',
+            year: 'numeric', month: '2-digit', day: '2-digit'
+        }).formatToParts(d);
+        return p.find(x => x.type === 'year').value
+             + p.find(x => x.type === 'month').value
+             + p.find(x => x.type === 'day').value;
     };
+    const now = new Date();
+    return { today: madridDate(now), tomorrow: madridDate(new Date(now.getTime() + 86400000)) };
 }
 
 export const LiveScore = {

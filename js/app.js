@@ -203,14 +203,19 @@ async function renderHome(container) {
     }
 }
 
-// Devuelve las fechas de hoy y mañana en formato YYYYMMDD que acepta la API de ESPN
+// Devuelve las fechas de hoy y mañana en formato YYYYMMDD en hora de Madrid
 function getDates() {
-    const now = new Date();
-    const fmt = d => d.toISOString().split('T')[0].replace(/-/g, '');
-    return {
-        today: fmt(now),
-        tomorrow: fmt(new Date(now.getTime() + 86400000))
+    const madridDate = d => {
+        const p = new Intl.DateTimeFormat('es-ES', {
+            timeZone: 'Europe/Madrid',
+            year: 'numeric', month: '2-digit', day: '2-digit'
+        }).formatToParts(d);
+        return p.find(x => x.type === 'year').value
+             + p.find(x => x.type === 'month').value
+             + p.find(x => x.type === 'day').value;
     };
+    const now = new Date();
+    return { today: madridDate(now), tomorrow: madridDate(new Date(now.getTime() + 86400000)) };
 }
 
 // Muestra los partidos en vivo en un carrusel horizontal con scroll
