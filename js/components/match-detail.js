@@ -55,18 +55,24 @@ export const MatchDetail = {
         const espnData = await Scraper.getCalendar(matchDate);
         let espnMatch = espnData?.matches?.find(m => m.id === matchId);
 
-        // Partidos a medianoche UTC (ej: 00:00Z) pueden aparecer en el calendario
-        // del dia anterior. Si no se encuentra, intentar el dia previo.
+        // Partidos de madrugada pueden estar en ESPN bajo la fecha UTC del dia siguiente
+        // o del anterior segun el desfase horario. Probamos ambas direcciones.
         if (!espnMatch && matchDate.length === 8) {
             const y = parseInt(matchDate.slice(0, 4));
             const mo = parseInt(matchDate.slice(4, 6)) - 1;
             const d = parseInt(matchDate.slice(6, 8));
-            const prev = new Date(Date.UTC(y, mo, d - 1));
-            const prevKey = prev.getUTCFullYear().toString()
-                + String(prev.getUTCMonth() + 1).padStart(2, '0')
-                + String(prev.getUTCDate()).padStart(2, '0');
-            const prevData = await Scraper.getCalendar(prevKey);
-            espnMatch = prevData?.matches?.find(m => m.id === matchId) || null;
+            const fmtUTC = dt => dt.getUTCFullYear().toString()
+                + String(dt.getUTCMonth() + 1).padStart(2, '0')
+                + String(dt.getUTCDate()).padStart(2, '0');
+            const prevKey = fmtUTC(new Date(Date.UTC(y, mo, d - 1)));
+            const nextKey = fmtUTC(new Date(Date.UTC(y, mo, d + 1)));
+            const [prevData, nextData] = await Promise.all([
+                Scraper.getCalendar(prevKey),
+                Scraper.getCalendar(nextKey)
+            ]);
+            espnMatch = prevData?.matches?.find(m => m.id === matchId)
+                     || nextData?.matches?.find(m => m.id === matchId)
+                     || null;
         }
 
         const cdnData = await Scraper.getMatchDetail(matchId, espnMatch?.date?.split('T')[0]?.replace(/-/g, '') || matchDate);

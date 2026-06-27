@@ -364,6 +364,20 @@ const handler = async (req, res) => {
                 const scoreboardData = await fetchJSON(dateParam ? `${ESPN_BASE}/scoreboard?dates=${dateParam}` : `${ESPN_BASE}/scoreboard`);
                 event = (scoreboardData.events || []).find(e => e.id === gameId);
             } catch (_) {}
+            // Fallback +1 dia: el partido puede estar en ESPN bajo la fecha UTC siguiente
+            if (!event && dateParam && dateParam.length === 8) {
+                try {
+                    const y = parseInt(dateParam.slice(0, 4));
+                    const mo = parseInt(dateParam.slice(4, 6)) - 1;
+                    const d = parseInt(dateParam.slice(6, 8));
+                    const next = new Date(Date.UTC(y, mo, d + 1));
+                    const nextStr = next.getUTCFullYear().toString()
+                        + String(next.getUTCMonth() + 1).padStart(2, '0')
+                        + String(next.getUTCDate()).padStart(2, '0');
+                    const nextData = await fetchJSON(`${ESPN_BASE}/scoreboard?dates=${nextStr}`);
+                    event = (nextData.events || []).find(e => e.id === gameId);
+                } catch (_) {}
+            }
             // Fallback: scoreboard en vivo (sin fecha) para partidos en curso
             if (!event && dateParam) {
                 try {
