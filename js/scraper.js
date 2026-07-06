@@ -184,6 +184,20 @@ export const Scraper = {
         }
     },
 
+    // Cuadro eliminatorio: partidos de todas las rondas KO (cache 2 minutos)
+    async getBracket() {
+        const cached = this.cached('bracket', 120000);
+        if (cached) return cached;
+        try {
+            const data = await this.fetch(`${API}/api/bracket`);
+            this.set('bracket', data);
+            return data;
+        } catch (e) {
+            console.error('Error obteniendo bracket:', e);
+            return null;
+        }
+    },
+
     // Todos los partidos de una seleccion en el torneo completo.
     // El servidor itera las 39 fechas del Mundial y filtra por codigo de equipo.
     // Cache de 5 minutos (los horarios son estables, solo cambian los resultados).

@@ -1,16 +1,41 @@
 import { Scraper } from '../scraper.js';
 import { getFavoriteTeam } from '../config.js';
+import { Bracket } from './bracket.js';
 
 export const Standings = {
     async render(el) {
         el.innerHTML = `
             <div class="standings-page">
                 <div class="page-header"><h1>Clasificacion Mundial 2026</h1></div>
-                <div id="standings-grid" class="standings-grid"><div class="loading">Cargando clasificacion...</div></div>
+                <div class="standings-tabs">
+                    <button class="standings-tab active" data-tab="bracket">Eliminatorias</button>
+                    <button class="standings-tab" data-tab="groups">Grupos</button>
+                </div>
+                <div id="standings-bracket-panel" class="standings-panel"></div>
+                <div id="standings-groups-panel" class="standings-panel" style="display:none">
+                    <div id="standings-grid" class="standings-grid"><div class="loading">Cargando clasificacion...</div></div>
+                </div>
             </div>`;
+
+        // Tabs
+        el.querySelectorAll('.standings-tab').forEach(btn => {
+            btn.addEventListener('click', () => {
+                el.querySelectorAll('.standings-tab').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const tab = btn.dataset.tab;
+                document.getElementById('standings-bracket-panel').style.display = tab === 'bracket' ? '' : 'none';
+                document.getElementById('standings-groups-panel').style.display  = tab === 'groups'  ? '' : 'none';
+            });
+        });
+
+        // Carga en paralelo: bracket + clasificación de grupos
+        const bracketPanel = document.getElementById('standings-bracket-panel');
+        bracketPanel.innerHTML = '<div class="loading">Cargando eliminatorias...</div>';
+        Bracket.render(bracketPanel);
+
         const data = await Scraper.getStandings();
         if (!data?.groups?.length) {
-            document.getElementById('standings-grid').innerHTML = '<div class="no-matches">Sin datos</div>';
+            document.getElementById('standings-grid').innerHTML = '<div class="no-matches">Sin datos de grupos</div>';
             return;
         }
         this.renderAllGroups(data.groups);

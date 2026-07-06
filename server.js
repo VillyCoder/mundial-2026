@@ -536,6 +536,66 @@ const handler = async (req, res) => {
         return;
     }
 
+    // Knockout bracket - all elimination round matches grouped by round
+    if (url.pathname === '/api/bracket') {
+        try {
+            function getRoundKey(note) {
+                const n = (note || '').toLowerCase();
+                if (n.includes('round of 32') || n.includes('rd of 32')) return 'r32';
+                if (n.includes('round of 16') || n.includes('rd of 16')) return 'r16';
+                if (n.includes('quarter')) return 'qf';
+                if (n.includes('third place') || n.includes('3rd place')) return 'third';
+                if (n.includes('semi')) return 'sf';
+                if (n.includes('final')) return 'final';
+                return null;
+            }
+
+            // Fechas de la fase eliminatoria del Mundial 2026: 25 jun - 20 jul
+            const dates = [];
+            const start = new Date('2026-06-25T00:00:00Z');
+            for (let i = 0; i < 26; i++) {
+                const d = new Date(start.getTime() + i * 86400000);
+                dates.push(d.getUTCFullYear().toString()
+                    + String(d.getUTCMonth() + 1).padStart(2, '0')
+                    + String(d.getUTCDate()).padStart(2, '0'));
+            }
+
+            const rounds = { r32: [], r16: [], qf: [], sf: [], final: [], third: [] };
+            const seenIds = new Set();
+
+            const batchSize = 5;
+            for (let i = 0; i < dates.length; i += batchSize) {
+                const batch = dates.slice(i, i + batchSize);
+                const results = await Promise.all(batch.map(d =>
+                    fetchJSON(`${ESPN_BASE}/scoreboard?dates=${d}`).catch(() => null)
+                ));
+                for (const data of results) {
+                    for (const event of (data?.events || [])) {
+                        if (seenIds.has(event.id)) continue;
+                        const comp = event.competitions?.[0];
+                        const key = getRoundKey(comp?.altGameNote || comp?.notes?.[0]?.headline || '');
+                        if (key && rounds[key]) {
+                            seenIds.add(event.id);
+                            rounds[key].push(normalizeESPNMatch(event));
+                        }
+                    }
+                }
+            }
+
+            // Sort each round by date (gives bracket order)
+            for (const r of Object.keys(rounds)) {
+                rounds[r].sort((a, b) => new Date(a.date) - new Date(b.date));
+            }
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ rounds, source: 'espn' }));
+        } catch (e) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: e.message }));
+        }
+        return;
+    }
+
     // ESPN calendar - matches for a specific date
     if (url.pathname === '/api/calendar') {
         const date = url.searchParams.get('dates');
@@ -590,7 +650,7 @@ const handler = async (req, res) => {
         try {
             const allMatches = [];
             const today = new Date();
-            for (let i = 0; i < 14; i++) {
+            for (let i = 0; i < 40; i++) {
                 const d = new Date(today.getTime() - i * 86400000);
                 const dateStr = d.getFullYear().toString() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
                 try {
@@ -721,7 +781,7 @@ const handler = async (req, res) => {
         try {
             const allMatches = [];
             const today = new Date();
-            for (let i = 0; i < 14; i++) {
+            for (let i = 0; i < 40; i++) {
                 const d = new Date(today.getTime() - i * 86400000);
                 const dateStr = d.getFullYear().toString() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
                 try {

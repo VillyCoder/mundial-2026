@@ -5,7 +5,7 @@
  * porque son en tiempo real; solo los archivos estaticos se cachean.
  */
 
-const CACHE_NAME = 'mundial-2026-v8';
+const CACHE_NAME = 'mundial-2026-v9';
 
 // Archivos de la interfaz que se guardan en cache al instalar la app
 const STATIC_ASSETS = [
@@ -24,6 +24,7 @@ const STATIC_ASSETS = [
     '/js/components/match-detail.js',
     '/js/components/calendar.js',
     '/js/components/standings.js',
+    '/js/components/bracket.js',
     '/js/components/stats.js',
     '/js/components/teams.js',
     '/js/components/my-team.js',
