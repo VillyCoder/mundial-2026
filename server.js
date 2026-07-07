@@ -539,6 +539,31 @@ const handler = async (req, res) => {
     // Knockout bracket - all elimination round matches grouped by round
     if (url.pathname === '/api/bracket') {
         try {
+            // Cuadro oficial del Mundial 2026 - slots del anillo exterior en orden correcto.
+            // Cada par [A, B] = partido R32; verificado con el cuadro oficial de la FIFA.
+            const WC2026_R32 = [
+                // Lado derecho, rama superior → QF: Francia vs Marruecos (slots 0-7)
+                ['Alemania',       'Paraguay'],
+                ['Francia',        'Suecia'],
+                ['Sudáfrica',      'Canadá'],
+                ['Países Bajos',   'Marruecos'],
+                // Lado derecho, rama inferior → QF: España vs Bélgica (slots 8-15)
+                ['Portugal',       'Croacia'],
+                ['España',         'Austria'],
+                ['Estados Unidos', 'Bosnia y Herzegovina'],
+                ['Bélgica',        'Senegal'],
+                // Lado izquierdo, rama inferior → QF: Noruega vs Inglaterra (slots 16-23)
+                ['Brasil',         'Japón'],
+                ['Costa de Marfil','Noruega'],
+                ['México',         'Ecuador'],
+                ['Inglaterra',     'RD Congo'],
+                // Lado izquierdo, rama superior → QF: pendiente (slots 24-31)
+                ['Argentina',      'Cabo Verde'],
+                ['Australia',      'Egipto'],
+                ['Suiza',          'Argelia'],
+                ['Colombia',       'Ghana'],
+            ];
+
             function getRoundKey(note) {
                 const n = (note || '').toLowerCase();
                 if (n.includes('round of 32') || n.includes('rd of 32')) return 'r32';
@@ -560,7 +585,7 @@ const handler = async (req, res) => {
                     + String(d.getUTCDate()).padStart(2, '0'));
             }
 
-            const rounds = { r32: [], r16: [], qf: [], sf: [], final: [], third: [] };
+            const raw = { r32: [], r16: [], qf: [], sf: [], final: [], third: [] };
             const seenIds = new Set();
 
             const batchSize = 5;
@@ -574,59 +599,60 @@ const handler = async (req, res) => {
                         if (seenIds.has(event.id)) continue;
                         const comp = event.competitions?.[0];
                         const key = getRoundKey(comp?.altGameNote || comp?.notes?.[0]?.headline || '');
-                        if (key && rounds[key]) {
+                        if (key && raw[key]) {
                             seenIds.add(event.id);
-                            rounds[key].push(normalizeESPNMatch(event));
+                            raw[key].push(normalizeESPNMatch(event));
                         }
                     }
                 }
             }
 
-            // Sort each round by date
-            for (const r of Object.keys(rounds)) {
-                rounds[r].sort((a, b) => new Date(a.date) - new Date(b.date));
+            // Helpers para buscar partidos por equipos
+            function byTeams(pool, t1, t2) {
+                return pool.find(m =>
+                    (m.homeTeam === t1 || m.awayTeam === t1) &&
+                    (m.homeTeam === t2 || m.awayTeam === t2)
+                );
+            }
+            function byTeamSets(pool, setA, setB) {
+                if (!setB.length) return undefined;
+                return pool.find(m =>
+                    (setA.includes(m.homeTeam) || setA.includes(m.awayTeam)) &&
+                    (setB.includes(m.homeTeam) || setB.includes(m.awayTeam))
+                );
             }
 
-            // Reorder outer round so that paired matches are adjacent,
-            // using the inner round as ground truth for pairings.
-            // Example: if R16 has Spain vs France, find the R32 match that
-            // produced Spain and the one that produced France → those two
-            // go into consecutive slots in the wheel.
-            function reorderByInner(outer, inner) {
-                if (!inner.length || outer.length < 2) return outer;
-                const used = new Set();
-                const ordered = [];
-                for (const mInner of inner) {
-                    const teams = [mInner.homeTeam, mInner.awayTeam];
-                    const idxs = [];
-                    for (const team of teams) {
-                        for (let i = 0; i < outer.length; i++) {
-                            if (used.has(i)) continue;
-                            const m = outer[i];
-                            if (m.homeTeam === team || m.awayTeam === team) {
-                                idxs.push(i);
-                                used.add(i);
-                                break;
-                            }
-                        }
-                    }
-                    if (idxs.length === 2) {
-                        ordered.push(outer[idxs[0]], outer[idxs[1]]);
-                    } else if (idxs.length === 1) {
-                        ordered.push(outer[idxs[0]]);
-                    }
-                }
-                // Any outer matches not yet in inner (upcoming rounds)
-                for (let i = 0; i < outer.length; i++) {
-                    if (!used.has(i)) ordered.push(outer[i]);
-                }
-                return ordered;
+            // R32 ordenado por la plantilla oficial del Mundial 2026
+            const r32 = WC2026_R32.map(([t1, t2]) => byTeams(raw.r32, t1, t2)).filter(Boolean);
+
+            // R16: cada par consecutivo de R32 alimenta un partido de R16
+            const r16 = [];
+            for (let i = 0; i + 1 < r32.length; i += 2) {
+                const setA = [r32[i].homeTeam, r32[i].awayTeam];
+                const setB = [r32[i+1].homeTeam, r32[i+1].awayTeam];
+                const m = byTeamSets(raw.r16, setA, setB);
+                if (m) r16.push(m);
             }
 
-            rounds.r32 = reorderByInner(rounds.r32, rounds.r16);
-            rounds.r16 = reorderByInner(rounds.r16, rounds.qf);
-            rounds.qf  = reorderByInner(rounds.qf,  rounds.sf);
-            rounds.sf  = reorderByInner(rounds.sf,  rounds.final);
+            // QF: cada par consecutivo de R16 alimenta un QF
+            const qf = [];
+            for (let i = 0; i + 1 < r16.length; i += 2) {
+                const setA = [r16[i].homeTeam, r16[i].awayTeam];
+                const setB = [r16[i+1].homeTeam, r16[i+1].awayTeam];
+                const m = byTeamSets(raw.qf, setA, setB);
+                if (m) qf.push(m);
+            }
+
+            // SF: cada par de QF alimenta una SF
+            const sf = [];
+            for (let i = 0; i + 1 < qf.length; i += 2) {
+                const setA = [qf[i].homeTeam, qf[i].awayTeam];
+                const setB = [qf[i+1].homeTeam, qf[i+1].awayTeam];
+                const m = byTeamSets(raw.sf, setA, setB);
+                if (m) sf.push(m);
+            }
+
+            const rounds = { r32, r16, qf, sf, final: raw.final, third: raw.third };
 
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ rounds, source: 'espn' }));
