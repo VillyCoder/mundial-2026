@@ -5,7 +5,7 @@
  * porque son en tiempo real; solo los archivos estaticos se cachean.
  */
 
-const CACHE_NAME = 'mundial-2026-v10';
+const CACHE_NAME = 'mundial-2026-v11';
 
 // Archivos de la interfaz que se guardan en cache al instalar la app
 const STATIC_ASSETS = [
@@ -81,6 +81,20 @@ self.addEventListener('fetch', event => {
             fetch(event.request).catch(() =>
                 new Response('{}', { headers: { 'Content-Type': 'application/json' } })
             )
+        );
+        return;
+    }
+
+    // Archivos JS de componentes: siempre red primero (actualizaciones inmediatas)
+    if (event.request.url.includes('/js/')) {
+        event.respondWith(
+            fetch(event.request)
+                .then(res => {
+                    const copy = res.clone();
+                    caches.open(CACHE_NAME).then(c => c.put(event.request, copy));
+                    return res;
+                })
+                .catch(() => caches.match(event.request))
         );
         return;
     }
