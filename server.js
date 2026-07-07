@@ -85,6 +85,8 @@ const TEAM_NAMES_ES = {
     'Slovakia': 'Eslovaquia',
     'Slovenia': 'Eslovenia',
     'Bosnia and Herzegovina': 'Bosnia y Herzegovina',
+    'Bosnia & Herzegovina': 'Bosnia y Herzegovina',
+    'Bosnia-Herzegovina': 'Bosnia y Herzegovina',
     'North Macedonia': 'Macedonia del Norte',
     'Costa Rica': 'Costa Rica',
     'Panama': 'Panamá',
