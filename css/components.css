@@ -662,6 +662,24 @@ html:not(.light-mode) .notif-status.info { color: #90CAF9; border-left-color: #9
 .bracket-page { padding: var(--space-md); }
 .bracket-page .page-header { margin-bottom: var(--space-sm); }
 
+/* SVG bracket horizontal scroll */
+.bkt-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+    border-radius: 10px;
+    max-width: 100%;
+}
+.bkt-scroll::-webkit-scrollbar { height: 6px; }
+.bkt-scroll::-webkit-scrollbar-track { background: transparent; }
+.bkt-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+.bkt-svg {
+    display: block;
+    /* Width is fixed in the SVG element; height scales proportionally */
+}
+
 .bv-wrap {
     display: flex;
     flex-direction: column;
