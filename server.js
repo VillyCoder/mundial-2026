@@ -582,10 +582,51 @@ const handler = async (req, res) => {
                 }
             }
 
-            // Sort each round by date (gives bracket order)
+            // Sort each round by date
             for (const r of Object.keys(rounds)) {
                 rounds[r].sort((a, b) => new Date(a.date) - new Date(b.date));
             }
+
+            // Reorder outer round so that paired matches are adjacent,
+            // using the inner round as ground truth for pairings.
+            // Example: if R16 has Spain vs France, find the R32 match that
+            // produced Spain and the one that produced France → those two
+            // go into consecutive slots in the wheel.
+            function reorderByInner(outer, inner) {
+                if (!inner.length || outer.length < 2) return outer;
+                const used = new Set();
+                const ordered = [];
+                for (const mInner of inner) {
+                    const teams = [mInner.homeTeam, mInner.awayTeam];
+                    const idxs = [];
+                    for (const team of teams) {
+                        for (let i = 0; i < outer.length; i++) {
+                            if (used.has(i)) continue;
+                            const m = outer[i];
+                            if (m.homeTeam === team || m.awayTeam === team) {
+                                idxs.push(i);
+                                used.add(i);
+                                break;
+                            }
+                        }
+                    }
+                    if (idxs.length === 2) {
+                        ordered.push(outer[idxs[0]], outer[idxs[1]]);
+                    } else if (idxs.length === 1) {
+                        ordered.push(outer[idxs[0]]);
+                    }
+                }
+                // Any outer matches not yet in inner (upcoming rounds)
+                for (let i = 0; i < outer.length; i++) {
+                    if (!used.has(i)) ordered.push(outer[i]);
+                }
+                return ordered;
+            }
+
+            rounds.r32 = reorderByInner(rounds.r32, rounds.r16);
+            rounds.r16 = reorderByInner(rounds.r16, rounds.qf);
+            rounds.qf  = reorderByInner(rounds.qf,  rounds.sf);
+            rounds.sf  = reorderByInner(rounds.sf,  rounds.final);
 
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ rounds, source: 'espn' }));
