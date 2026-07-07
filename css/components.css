@@ -666,19 +666,18 @@ html:not(.light-mode) .notif-status.info { color: #90CAF9; border-left-color: #9
 .bkt-mobile  { display: none; }
 
 .bkt-scroll {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
-    scrollbar-color: var(--border) transparent;
     border-radius: var(--radius-lg);
     border: 1px solid var(--border);
     box-shadow: var(--shadow-md);
+    overflow: hidden;
 }
-.bkt-scroll::-webkit-scrollbar { height: 6px; }
-.bkt-scroll::-webkit-scrollbar-track { background: transparent; }
-.bkt-scroll::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 3px; opacity: 0.4; }
 
-.bkt-svg { display: block; }
+.bkt-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    min-width: 0;
+}
 
 /* ── Móvil: tabs + tarjetas ── */
 @media (max-width: 900px) {

@@ -163,7 +163,7 @@ function buildSVG(rounds) {
     const seps = sep(LR16)+sep(LQF)+sep(LSF)+sep(RSF)+sep(RQF)+sep(RR16);
 
     return `<div class="bkt-scroll">
-        <svg class="bkt-svg" viewBox="0 0 ${SVG_W} ${SVG_H}" width="${SVG_W}" height="${SVG_H}" xmlns="http://www.w3.org/2000/svg">
+        <svg class="bkt-svg" viewBox="0 0 ${SVG_W} ${SVG_H}" xmlns="http://www.w3.org/2000/svg">
             <rect width="${SVG_W}" height="${SVG_H}" fill="${C.bgSurface}" rx="12"/>
             ${seps}
             ${title}${lbls}
