@@ -5,7 +5,7 @@
  * porque son en tiempo real; solo los archivos estaticos se cachean.
  */
 
-const CACHE_NAME = 'mundial-2026-v11';
+const CACHE_NAME = 'mundial-2026-v12';
 
 // Archivos de la interfaz que se guardan en cache al instalar la app
 const STATIC_ASSETS = [
@@ -24,7 +24,6 @@ const STATIC_ASSETS = [
     '/js/components/match-detail.js',
     '/js/components/calendar.js',
     '/js/components/standings.js',
-    '/js/components/bracket.js',
     '/js/components/stats.js',
     '/js/components/teams.js',
     '/js/components/my-team.js',
@@ -85,8 +84,10 @@ self.addEventListener('fetch', event => {
         return;
     }
 
-    // Archivos JS de componentes: siempre red primero (actualizaciones inmediatas)
-    if (event.request.url.includes('/js/')) {
+    const url = new URL(event.request.url);
+
+    // bracket.js: red primero para garantizar actualizaciones inmediatas
+    if (url.pathname.endsWith('/bracket.js')) {
         event.respondWith(
             fetch(event.request)
                 .then(res => {
@@ -99,7 +100,6 @@ self.addEventListener('fetch', event => {
         return;
     }
 
-    const url = new URL(event.request.url);
     const isHtml = url.pathname === '/' || url.pathname === '/index.html';
     const isVersioned = url.search.includes('v=');
 
